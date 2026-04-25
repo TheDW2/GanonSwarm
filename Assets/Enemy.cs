@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour, IDamageable
@@ -6,27 +7,15 @@ public class Enemy : MonoBehaviour, IDamageable
     public float health = 50f;
     public float moveSpeed = 2.5f;
 
-    private Transform player;
+    // protected so subclasses like MeleeEnemy can access them
+    protected Transform player;
+    protected bool isStunned = false;
 
-    void Start()
+    protected virtual void Start()
     {
-        // Find the player by tag - make sure your Player GameObject is tagged "Player"
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
             player = playerObj.transform;
-    }
-
-    void Update()
-    {
-        if (player == null) return;
-
-        // Move towards the player
-        Vector2 direction = (player.position - transform.position).normalized;
-        transform.position += (Vector3)(direction * moveSpeed * Time.deltaTime);
-
-        // Face the player
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0f, 0f, angle);
     }
 
     public void TakeDamage(float amount)
@@ -38,7 +27,19 @@ public class Enemy : MonoBehaviour, IDamageable
             Die();
     }
 
-    void Die()
+    public void Stun(float duration)
+    {
+        StartCoroutine(StunCoroutine(duration));
+    }
+
+    IEnumerator StunCoroutine(float duration)
+    {
+        isStunned = true;
+        yield return new WaitForSeconds(duration);
+        isStunned = false;
+    }
+
+    protected virtual void Die()
     {
         Debug.Log($"{gameObject.name} died!");
         Destroy(gameObject);
