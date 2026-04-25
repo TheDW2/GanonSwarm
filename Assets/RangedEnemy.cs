@@ -16,11 +16,15 @@ public class RangedEnemy : Enemy
     public float projectileSpeed = 6f;
     public float projectileDamage = 20f;
     public float projectileLifetime = 4f;
-    public float spawnOffset = 0.8f; // How far in front of enemy the projectile spawns
+    public float spawnOffset = 0.8f;
 
     [Header("Backpedal")]
     public float backpedalSpeed = 2.5f;
     public float backpedalDistance = 2f;
+
+    [Header("References")]
+    // Drag the sprite child GameObject here — it will be counter-rotated to stay upright
+    public Transform spriteObject;
 
     private enum State { Chasing, Casting, Backpedaling }
     private State currentState = State.Chasing;
@@ -44,6 +48,7 @@ public class RangedEnemy : Enemy
                 break;
             case State.Casting:
                 FacePlayer();
+                KeepSpriteUpright();
                 break;
             case State.Backpedaling:
                 HandleBackpedaling(dist);
@@ -82,6 +87,7 @@ public class RangedEnemy : Enemy
         Vector2 awayFromPlayer = (transform.position - player.position).normalized;
         transform.position += (Vector3)(awayFromPlayer * backpedalSpeed * Time.deltaTime);
         FacePlayer();
+        KeepSpriteUpright();
     }
 
     void ChasePlayer()
@@ -89,6 +95,7 @@ public class RangedEnemy : Enemy
         Vector2 direction = (player.position - transform.position).normalized;
         transform.position += (Vector3)(direction * moveSpeed * Time.deltaTime);
         FacePlayer();
+        KeepSpriteUpright();
     }
 
     void FacePlayer()
@@ -97,6 +104,12 @@ public class RangedEnemy : Enemy
         Vector2 dir = (player.position - transform.position).normalized;
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0f, 0f, angle);
+    }
+
+    void KeepSpriteUpright()
+    {
+        if (spriteObject != null)
+            spriteObject.rotation = Quaternion.identity;
     }
 
     IEnumerator CastAndShoot()
@@ -125,17 +138,14 @@ public class RangedEnemy : Enemy
 
             elapsed += Time.deltaTime;
             FacePlayer();
+            KeepSpriteUpright();
             yield return null;
         }
 
-        // Calculate direction at moment of firing
         if (player != null)
         {
             Vector2 shootDirection = ((Vector2)player.position - (Vector2)transform.position).normalized;
-
-            // Spawn projectile offset in shoot direction so it starts outside the enemy collider
             Vector2 spawnPos = (Vector2)transform.position + shootDirection * spawnOffset;
-
             ShootProjectile(spawnPos, shootDirection);
         }
 

@@ -1,9 +1,11 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerHealth : MonoBehaviour, IDamageable
 {
     [Header("Health")]
     public float maxHealth = 100f;
+
     private float currentHealth;
 
     void Awake()
@@ -23,8 +25,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     void Die()
     {
-        Debug.Log("Player died!");
-        // Hook up death screen / respawn here later
+        Debug.Log("Player died! Restarting...");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public float GetCurrentHealth() => currentHealth;
