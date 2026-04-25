@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -7,24 +8,26 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 5f;
 
     [Header("References")]
-    // Drag your sprite child GameObject here — it stays upright and vibrates during dash windup
     public Transform spriteObject;
 
     [Header("Dash — Windup Times")]
-    public float minWindupTime = 2f;   // Minimum hold before dash registers
-    public float maxWindupTime = 4f;   // Hold time for maximum dash distance
+    public float minWindupTime = 2f;
+    public float maxWindupTime = 4f;
 
     [Header("Dash — Distances")]
-    public float minDashDistance = 3f; // Distance at minWindupTime
-    public float maxDashDistance = 8f; // Distance at maxWindupTime
+    public float minDashDistance = 3f;
+    public float maxDashDistance = 8f;
 
     [Header("Dash — Feel")]
-    public float dashDuration = 0.15f;       // How long the dash travel takes
-    public float vibrationStrength = 0.05f;  // How far the sprite shakes during windup
-    public float vibrationSpeed = 30f;       // How fast the sprite shakes
+    public float dashDuration = 0.15f;
+    public float vibrationStrength = 0.05f;
+    public float vibrationSpeed = 30f;
 
-    // ─────────────────────────────────────────
-    // Private state
+    [Header("Dash — Damage")]
+    public float dashDamage = 40f;
+    public LayerMask enemyLayer;
+    public GameObject dashHitboxObject;
+
     // ─────────────────────────────────────────
     private Rigidbody2D rb;
     private Camera mainCamera;
@@ -33,9 +36,11 @@ public class PlayerController : MonoBehaviour
     private bool isWindingUp = false;
     private float windupTimer = 0f;
     private bool isDashing = false;
+    private bool dashFired = false;
+    private bool mustRelease = false;
 
-    private Vector2 dashDirection;
-    private Vector3 spriteOrigin; // local position of sprite child at rest
+    private Vector3 spriteOrigin;
+    private HashSet<Collider2D> dashedThrough = new HashSet<Collider2D>();
 
     void Awake()
     {
@@ -43,6 +48,9 @@ public class PlayerController : MonoBehaviour
         mainCamera = Camera.main;
         if (spriteObject != null)
             spriteOrigin = spriteObject.localPosition;
+
+        if (dashHitboxObject != null)
+            dashHitboxObject.SetActive(false);
     }
 
     void Update()
@@ -50,6 +58,9 @@ public class PlayerController : MonoBehaviour
         HandleMovementInput();
         HandleAiming();
         HandleDash();
+
+        if (isDashing)
+            CheckDashHits();
     }
 
     void FixedUpdate()
@@ -58,9 +69,6 @@ public class PlayerController : MonoBehaviour
             rb.linearVelocity = moveInput * moveSpeed;
     }
 
-    // ─────────────────────────────────────────
-    //  Movement
-    // ─────────────────────────────────────────
     void HandleMovementInput()
     {
         float x = Input.GetAxisRaw("Horizontal");
@@ -68,9 +76,6 @@ public class PlayerController : MonoBehaviour
         moveInput = new Vector2(x, y).normalized;
     }
 
-    // ─────────────────────────────────────────
-    //  Aiming — root rotates, sprite stays upright
-    // ─────────────────────────────────────────
     void HandleAiming()
     {
         Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
@@ -80,74 +85,97 @@ public class PlayerController : MonoBehaviour
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
 
-        // Keep sprite child upright regardless of root rotation
         if (spriteObject != null && !isWindingUp)
             spriteObject.rotation = Quaternion.identity;
     }
 
-    // ─────────────────────────────────────────
-    //  Dash
-    // ─────────────────────────────────────────
     void HandleDash()
     {
         if (isDashing) return;
+
+        // Released space
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            mustRelease = false;
+
+            if (isWindingUp)
+            {
+                isWindingUp = false;
+
+                if (spriteObject != null)
+                    spriteObject.localPosition = spriteOrigin;
+
+                if (windupTimer >= minWindupTime && !dashFired)
+                    FireDash(windupTimer);
+
+                windupTimer = 0f;
+                dashFired = false;
+            }
+            return;
+        }
+
+        if (mustRelease) return;
 
         // Begin windup
         if (Input.GetKeyDown(KeyCode.Space) && !isWindingUp)
         {
             isWindingUp = true;
             windupTimer = 0f;
-
-            // Lock dash direction to mouse direction at moment of press
-            Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
-            mouseWorldPos.z = 0f;
-            dashDirection = ((Vector2)(mouseWorldPos - transform.position)).normalized;
+            dashFired = false;
         }
 
-        // Hold — accumulate windup, cap at maxWindupTime, vibrate sprite
-        if (isWindingUp && Input.GetKey(KeyCode.Space))
+        // Hold
+        if (isWindingUp && Input.GetKey(KeyCode.Space) && !dashFired)
         {
-            windupTimer = Mathf.Min(windupTimer + Time.deltaTime, maxWindupTime);
+            windupTimer += Time.deltaTime;
 
-            // Sprite vibration — oscillate local position
             if (spriteObject != null)
             {
                 float vibX = Mathf.Sin(Time.time * vibrationSpeed) * vibrationStrength;
                 float vibY = Mathf.Cos(Time.time * vibrationSpeed * 1.3f) * vibrationStrength;
                 spriteObject.localPosition = spriteOrigin + new Vector3(vibX, vibY, 0f);
-                spriteObject.rotation = Quaternion.identity; // keep upright while vibrating
+                spriteObject.rotation = Quaternion.identity;
             }
-        }
 
-        // Released — decide what happens
-        if (isWindingUp && Input.GetKeyUp(KeyCode.Space))
-        {
-            isWindingUp = false;
-
-            // Reset sprite position
-            if (spriteObject != null)
-                spriteObject.localPosition = spriteOrigin;
-
-            if (windupTimer < minWindupTime)
+            // Auto-fire at max windup
+            if (windupTimer >= maxWindupTime)
             {
-                // Too short — cancel, do nothing
-                windupTimer = 0f;
-                return;
+                windupTimer = maxWindupTime;
+                dashFired = true;
+                isWindingUp = false;
+                mustRelease = true;
+
+                if (spriteObject != null)
+                    spriteObject.localPosition = spriteOrigin;
+
+                FireDash(maxWindupTime);
             }
-
-            // Calculate dash distance based on how long they held
-            // Clamp between min and max, then lerp distance
-            float t = Mathf.InverseLerp(minWindupTime, maxWindupTime, windupTimer);
-            float distance = Mathf.Lerp(minDashDistance, maxDashDistance, t);
-
-            StartCoroutine(PerformDash(dashDirection, distance));
-            windupTimer = 0f;
         }
+    }
+
+    void FireDash(float heldTime)
+    {
+        Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+        mouseWorldPos.z = 0f;
+        Vector2 toMouse = new Vector2(
+            mouseWorldPos.x - transform.position.x,
+            mouseWorldPos.y - transform.position.y
+        );
+        Vector2 direction = toMouse.normalized;
+
+        float t = Mathf.InverseLerp(minWindupTime, maxWindupTime, heldTime);
+        float distance = Mathf.Lerp(minDashDistance, maxDashDistance, t);
+
+        StartCoroutine(PerformDash(direction, distance));
     }
 
     IEnumerator PerformDash(Vector2 direction, float distance)
     {
         isDashing = true;
+        dashedThrough.Clear();
+
+        if (dashHitboxObject != null)
+            dashHitboxObject.SetActive(true);
 
         float elapsed = 0f;
         Vector2 startPos = rb.position;
@@ -163,6 +191,36 @@ public class PlayerController : MonoBehaviour
 
         rb.MovePosition(targetPos);
         rb.linearVelocity = Vector2.zero;
+
+        if (dashHitboxObject != null)
+            dashHitboxObject.SetActive(false);
+
+        dashedThrough.Clear();
         isDashing = false;
+    }
+
+    void CheckDashHits()
+    {
+        if (dashHitboxObject == null) return;
+
+        Collider2D hitbox = dashHitboxObject.GetComponent<Collider2D>();
+        if (hitbox == null) return;
+
+        List<Collider2D> hits = new List<Collider2D>();
+        ContactFilter2D filter = new ContactFilter2D();
+        filter.SetLayerMask(enemyLayer);
+        filter.useTriggers = true;
+
+        Physics2D.OverlapCollider(hitbox, filter, hits);
+
+        foreach (Collider2D hit in hits)
+        {
+            if (dashedThrough.Contains(hit)) continue;
+            dashedThrough.Add(hit);
+
+            IDamageable damageable = hit.GetComponent<IDamageable>();
+            if (damageable != null)
+                damageable.TakeDamage(dashDamage);
+        }
     }
 }

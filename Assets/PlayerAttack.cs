@@ -25,6 +25,18 @@ public class PlayerAttack : MonoBehaviour
     public GameObject windupIndicator;
 
     // ─────────────────────────────────────────
+    //  Q — Ground Stomp
+    // ─────────────────────────────────────────
+    [Header("Ground Stomp (Q)")]
+    public float stompDamage = 50f;
+    public float stompStunDuration = 1.5f;
+    public float stompCooldown = 8f;
+    public float stompActiveDuration = 0.2f; // How long the stomp hitbox stays active
+    // Assign a child GameObject with a CircleCollider2D (Is Trigger = true)
+    // The circle size in the Inspector defines the stomp radius
+    public GameObject stompObject;
+
+    // ─────────────────────────────────────────
     [Header("Shared")]
     public LayerMask enemyLayer;
 
@@ -35,19 +47,28 @@ public class PlayerAttack : MonoBehaviour
     // Charged slash state
     private bool canChargedAttack = true;
     private float chargedCooldownTimer = 0f;
-
     private bool isWindingUp = false;
     private float windupTimer = 0f;
-    private bool slashFired = false;   // true once the slash fires during this hold
-    private bool mustRelease = false;  // player must release before charging again
+    private bool slashFired = false;
+    private bool mustRelease = false;
+
+    // Stomp state
+    private bool canStomp = true;
+    private float stompCooldownTimer = 0f;
 
     // ─────────────────────────────────────────
+
+    void Awake()
+    {
+        if (stompObject != null) stompObject.SetActive(false);
+    }
 
     void Update()
     {
         HandleCooldowns();
         HandleQuickSlash();
         HandleChargedSlash();
+        HandleStomp();
     }
 
     void HandleCooldowns()
@@ -61,10 +82,15 @@ public class PlayerAttack : MonoBehaviour
             chargedCooldownTimer -= Time.deltaTime;
         else
             canChargedAttack = true;
+
+        if (stompCooldownTimer > 0f)
+            stompCooldownTimer -= Time.deltaTime;
+        else
+            canStomp = true;
     }
 
     // ─────────────────────────────────────────
-    //  Mouse1
+    //  Mouse1 — Quick Slash
     // ─────────────────────────────────────────
     void HandleQuickSlash()
     {
@@ -73,26 +99,28 @@ public class PlayerAttack : MonoBehaviour
     }
 
     // ─────────────────────────────────────────
-    //  Mouse2
+    //  Mouse2 — Charged Slash
     // ─────────────────────────────────────────
     void HandleChargedSlash()
     {
-        // Player released mouse2 — reset so they can charge again
+        if (!canChargedAttack) return;
+
         if (Input.GetMouseButtonUp(1))
         {
             if (windupIndicator != null) windupIndicator.SetActive(false);
-            isWindingUp = false;
-            windupTimer = 0f;
             mustRelease = false;
-            slashFired = false;
+
+            if (isWindingUp)
+            {
+                isWindingUp = false;
+                windupTimer = 0f;
+                slashFired = false;
+            }
             return;
         }
 
-        // Don't start a new charge if we're waiting for a release
         if (mustRelease) return;
-        if (!canChargedAttack) return;
 
-        // Begin windup on press
         if (Input.GetMouseButtonDown(1) && !isWindingUp)
         {
             isWindingUp = true;
@@ -101,23 +129,72 @@ public class PlayerAttack : MonoBehaviour
             if (windupIndicator != null) windupIndicator.SetActive(true);
         }
 
-        // Hold — accumulate time and fire as soon as windup completes
         if (isWindingUp && Input.GetMouseButton(1) && !slashFired)
         {
             windupTimer += Time.deltaTime;
 
             if (windupTimer >= windupTime)
             {
-                // Windup complete — fire immediately, don't wait for release
                 slashFired = true;
-                mustRelease = true; // require release before next charge
+                mustRelease = true;
                 isWindingUp = false;
-
                 if (windupIndicator != null) windupIndicator.SetActive(false);
-
                 StartCoroutine(PerformSlash(chargedSlashObject, chargedDamage, chargedDuration, chargedCooldown, isCharged: true));
             }
         }
+    }
+
+    // ─────────────────────────────────────────
+    //  Q — Ground Stomp
+    // ─────────────────────────────────────────
+    void HandleStomp()
+    {
+        if (Input.GetKeyDown(KeyCode.Q) && canStomp)
+            StartCoroutine(PerformStomp());
+    }
+
+    IEnumerator PerformStomp()
+    {
+        canStomp = false;
+        stompCooldownTimer = stompCooldown;
+
+        if (stompObject == null)
+        {
+            Debug.LogWarning("No stomp object assigned!");
+            yield break;
+        }
+
+        stompObject.SetActive(true);
+
+        // Wait a frame for the collider to register
+        yield return null;
+
+        Collider2D stompCollider = stompObject.GetComponent<Collider2D>();
+        if (stompCollider != null)
+        {
+            List<Collider2D> hits = new List<Collider2D>();
+            ContactFilter2D filter = new ContactFilter2D();
+            filter.SetLayerMask(enemyLayer);
+            filter.useTriggers = true;
+
+            Physics2D.OverlapCollider(stompCollider, filter, hits);
+
+            foreach (Collider2D hit in hits)
+            {
+                // Deal damage
+                IDamageable damageable = hit.GetComponent<IDamageable>();
+                if (damageable != null)
+                    damageable.TakeDamage(stompDamage);
+
+                // Apply stun
+                Enemy enemy = hit.GetComponent<Enemy>();
+                if (enemy != null)
+                    enemy.Stun(stompStunDuration);
+            }
+        }
+
+        yield return new WaitForSeconds(stompActiveDuration);
+        stompObject.SetActive(false);
     }
 
     // ─────────────────────────────────────────
@@ -135,8 +212,6 @@ public class PlayerAttack : MonoBehaviour
         }
 
         slashObject.SetActive(true);
-
-        // Wait one frame so the collider registers
         yield return null;
 
         Collider2D slashCollider = slashObject.GetComponent<Collider2D>();
@@ -145,7 +220,7 @@ public class PlayerAttack : MonoBehaviour
             List<Collider2D> hits = new List<Collider2D>();
             ContactFilter2D filter = new ContactFilter2D();
             filter.SetLayerMask(enemyLayer);
-            filter.useTriggers = false;
+            filter.useTriggers = true;
 
             Physics2D.OverlapCollider(slashCollider, filter, hits);
 
