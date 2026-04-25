@@ -85,7 +85,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -99,7 +99,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -123,7 +123,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -151,12 +151,12 @@ TextureImporter:
       name: RamEffect-Sheet_0
       rect:
         serializedVersion: 2
-        x: 6
+        x: 0
         y: 0
-        width: 39
+        width: 48
         height: 48
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -173,12 +173,12 @@ TextureImporter:
       name: RamEffect-Sheet_1
       rect:
         serializedVersion: 2
-        x: 53
+        x: 48
         y: 0
-        width: 42
+        width: 48
         height: 48
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -195,12 +195,12 @@ TextureImporter:
       name: RamEffect-Sheet_2
       rect:
         serializedVersion: 2
-        x: 97
+        x: 96
         y: 0
-        width: 53
+        width: 48
         height: 48
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -217,12 +217,12 @@ TextureImporter:
       name: RamEffect-Sheet_3
       rect:
         serializedVersion: 2
-        x: 150
-        y: 23
-        width: 14
-        height: 22
+        x: 144
+        y: 0
+        width: 48
+        height: 48
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -239,12 +239,12 @@ TextureImporter:
       name: RamEffect-Sheet_4
       rect:
         serializedVersion: 2
-        x: 167
+        x: 192
         y: 0
-        width: 46
-        height: 45
+        width: 48
+        height: 48
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -261,12 +261,12 @@ TextureImporter:
       name: RamEffect-Sheet_5
       rect:
         serializedVersion: 2
-        x: 224
+        x: 240
         y: 0
-        width: 47
-        height: 43
+        width: 48
+        height: 48
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -283,12 +283,12 @@ TextureImporter:
       name: RamEffect-Sheet_6
       rect:
         serializedVersion: 2
-        x: 271
+        x: 288
         y: 0
-        width: 34
+        width: 48
         height: 48
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -305,12 +305,12 @@ TextureImporter:
       name: RamEffect-Sheet_7
       rect:
         serializedVersion: 2
-        x: 303
-        y: 42
-        width: 78
-        height: 6
+        x: 336
+        y: 0
+        width: 48
+        height: 48
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -323,209 +323,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: RamEffect-Sheet_8
-      rect:
-        serializedVersion: 2
-        x: 152
-        y: 13
-        width: 10
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bcb7d0ed59a54ee00800000000000000
-      internalID: 1073082210943073227
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: RamEffect-Sheet_9
-      rect:
-        serializedVersion: 2
-        x: 169
-        y: 0
-        width: 11
-        height: 14
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0b22fed4d39561df0800000000000000
-      internalID: -209882212790754640
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: RamEffect-Sheet_10
-      rect:
-        serializedVersion: 2
-        x: 181
-        y: 8
-        width: 7
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8e6e9d41bfd633ff0800000000000000
-      internalID: -57581445071640856
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: RamEffect-Sheet_11
-      rect:
-        serializedVersion: 2
-        x: 68
-        y: 0
-        width: 7
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6bb1b27ed50365920800000000000000
-      internalID: 2978621383420615606
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: RamEffect-Sheet_12
-      rect:
-        serializedVersion: 2
-        x: 75
-        y: 0
-        width: 9
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0e6686af3499e0cc0800000000000000
-      internalID: -3742885723055298848
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: RamEffect-Sheet_13
-      rect:
-        serializedVersion: 2
-        x: 153
-        y: 0
-        width: 12
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 29b00889ccafc7f60800000000000000
-      internalID: 8033571591960923026
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: RamEffect-Sheet_14
-      rect:
-        serializedVersion: 2
-        x: 164
-        y: 0
-        width: 6
-        height: 5
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 43892b99acaeef220800000000000000
-      internalID: 2521710997256968244
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: RamEffect-Sheet_15
-      rect:
-        serializedVersion: 2
-        x: 179
-        y: 0
-        width: 10
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 22ec460c3a1655fc0800000000000000
-      internalID: -3506789378902667742
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: RamEffect-Sheet_16
-      rect:
-        serializedVersion: 2
-        x: 212
-        y: 0
-        width: 16
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4206553fd098ee750800000000000000
-      internalID: 6336152418766905380
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: dcac2e14545db2640a260fdd8790f056
     internalID: 0
     vertices: []
     indices: 
@@ -533,25 +335,18 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":48.0,"y":48.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       RamEffect-Sheet_0: 4082902485051678852
       RamEffect-Sheet_1: -3540700547871833077
-      RamEffect-Sheet_10: -57581445071640856
-      RamEffect-Sheet_11: 2978621383420615606
-      RamEffect-Sheet_12: -3742885723055298848
-      RamEffect-Sheet_13: 8033571591960923026
-      RamEffect-Sheet_14: 2521710997256968244
-      RamEffect-Sheet_15: -3506789378902667742
-      RamEffect-Sheet_16: 6336152418766905380
       RamEffect-Sheet_2: 6979812766475452451
       RamEffect-Sheet_3: -9121591046917874201
       RamEffect-Sheet_4: 8740826270048437143
       RamEffect-Sheet_5: -6499804229238095055
       RamEffect-Sheet_6: -2701760677543950088
       RamEffect-Sheet_7: -1484977527130886462
-      RamEffect-Sheet_8: 1073082210943073227
-      RamEffect-Sheet_9: -209882212790754640
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

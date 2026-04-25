@@ -28,6 +28,11 @@ public class PlayerController : MonoBehaviour
     public LayerMask enemyLayer;
     public GameObject dashHitboxObject;
 
+    // ── Properties read by PlayerAnimator ──
+    public bool IsMoving { get; private set; }
+    public bool IsWindingUp { get; private set; }
+    public bool DashStartedThisFrame { get; private set; }
+
     // ─────────────────────────────────────────
     private Rigidbody2D rb;
     private Camera mainCamera;
@@ -55,12 +60,18 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        DashStartedThisFrame = false;
+
         HandleMovementInput();
         HandleAiming();
         HandleDash();
 
         if (isDashing)
             CheckDashHits();
+
+        // Update animation properties
+        IsMoving = moveInput.magnitude > 0f && !isDashing;
+        IsWindingUp = isWindingUp;
     }
 
     void FixedUpdate()
@@ -93,7 +104,6 @@ public class PlayerController : MonoBehaviour
     {
         if (isDashing) return;
 
-        // Released space
         if (Input.GetKeyUp(KeyCode.Space))
         {
             mustRelease = false;
@@ -116,7 +126,6 @@ public class PlayerController : MonoBehaviour
 
         if (mustRelease) return;
 
-        // Begin windup
         if (Input.GetKeyDown(KeyCode.Space) && !isWindingUp)
         {
             isWindingUp = true;
@@ -124,7 +133,6 @@ public class PlayerController : MonoBehaviour
             dashFired = false;
         }
 
-        // Hold
         if (isWindingUp && Input.GetKey(KeyCode.Space) && !dashFired)
         {
             windupTimer += Time.deltaTime;
@@ -137,7 +145,6 @@ public class PlayerController : MonoBehaviour
                 spriteObject.rotation = Quaternion.identity;
             }
 
-            // Auto-fire at max windup
             if (windupTimer >= maxWindupTime)
             {
                 windupTimer = maxWindupTime;
@@ -166,6 +173,7 @@ public class PlayerController : MonoBehaviour
         float t = Mathf.InverseLerp(minWindupTime, maxWindupTime, heldTime);
         float distance = Mathf.Lerp(minDashDistance, maxDashDistance, t);
 
+        DashStartedThisFrame = true;
         StartCoroutine(PerformDash(direction, distance));
     }
 

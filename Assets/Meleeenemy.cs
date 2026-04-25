@@ -15,6 +15,13 @@ public class MeleeEnemy : Enemy
     [Header("Layer")]
     public LayerMask playerLayer;
 
+    [Header("References")]
+    // Drag the sprite child GameObject here — it will be counter-rotated to stay upright
+    public Transform spriteObject;
+
+    // Read by MeleeEnemyAnimator
+    public bool IsMoving { get; private set; }
+
     private bool isAttacking = false;
     private float cooldownTimer = 0f;
 
@@ -27,12 +34,18 @@ public class MeleeEnemy : Enemy
 
     void Update()
     {
-        if (isStunned || isAttacking) return;
+        if (isStunned || isAttacking)
+        {
+            IsMoving = false;
+            KeepSpriteUpright();
+            return;
+        }
 
         if (cooldownTimer > 0f)
         {
             cooldownTimer -= Time.deltaTime;
             ChasePlayer();
+            KeepSpriteUpright();
             return;
         }
 
@@ -41,27 +54,43 @@ public class MeleeEnemy : Enemy
         float distToPlayer = Vector2.Distance(transform.position, player.position);
 
         if (distToPlayer <= slashRange)
+        {
+            IsMoving = false;
+            KeepSpriteUpright();
             StartCoroutine(PerformSlash());
+        }
         else
+        {
             ChasePlayer();
+            KeepSpriteUpright();
+        }
     }
 
     void ChasePlayer()
     {
         if (player == null) return;
 
+        IsMoving = true;
+
         Vector2 direction = (player.position - transform.position).normalized;
         transform.position += (Vector3)(direction * moveSpeed * Time.deltaTime);
 
+        // Root rotates to face player — slash hitbox rotates with it
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0f, 0f, angle);
+    }
+
+    void KeepSpriteUpright()
+    {
+        if (spriteObject != null)
+            spriteObject.rotation = Quaternion.identity;
     }
 
     IEnumerator PerformSlash()
     {
         isAttacking = true;
+        IsMoving = false;
 
-        // Windup — stand still, keep facing player
         float windupElapsed = 0f;
         while (windupElapsed < slashWindup)
         {
@@ -72,12 +101,12 @@ public class MeleeEnemy : Enemy
                 Vector2 dir = (player.position - transform.position).normalized;
                 float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
                 transform.rotation = Quaternion.Euler(0f, 0f, angle);
+                KeepSpriteUpright();
             }
 
             yield return null;
         }
 
-        // Fire slash
         if (slashHitboxObject != null)
             slashHitboxObject.SetActive(true);
 
